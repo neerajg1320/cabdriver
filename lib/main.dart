@@ -34,7 +34,7 @@ Future<void> main() async {
 
   currentFirebaseUser = FirebaseAuth.instance.currentUser;
 
-  await PushNotificationService.initFirebaseMessaging();
+  // await PushNotificationService.initialize();
 
   runApp(MyApp());
 }

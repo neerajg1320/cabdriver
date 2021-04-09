@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:cabdriver/brand_colors.dart';
 import 'package:cabdriver/globalvarialbes.dart';
+import 'package:cabdriver/helpers/pushnotificationservice.dart';
 import 'package:cabdriver/widgets/AvailabilityButton.dart';
 import 'package:cabdriver/widgets/ConfirmSheet.dart';
+import 'package:cabdriver/widgets/NotificationDialog.dart';
 import 'package:cabdriver/widgets/TaxiButton.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +39,20 @@ class _HomeTabState extends State<HomeTab> {
     mapController.animateCamera(CameraUpdate.newLatLng(pos));
   }
 
+  void initPushNotification() async {
+    PushNotificationService.initialize(context);
+    PushNotificationService.getToken();
+  }
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    initPushNotification();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Stack(
