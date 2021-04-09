@@ -25,6 +25,7 @@ class NewTripPage extends StatefulWidget {
 class _NewTripPageState extends State<NewTripPage> {
   GoogleMapController rideMapController;
   Completer<GoogleMapController> _controller = Completer();
+  double mapPaddingBottom = 0;
 
   Set<Marker> _markers = Set<Marker>();
   Set<Circle> _circles = Set<Circle>();
@@ -39,6 +40,7 @@ class _NewTripPageState extends State<NewTripPage> {
       body: Stack(
         children: [
           GoogleMap(
+            padding: EdgeInsets.only(bottom: mapPaddingBottom),
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
             compassEnabled: true,
@@ -52,6 +54,10 @@ class _NewTripPageState extends State<NewTripPage> {
             onMapCreated: (GoogleMapController controller) async {
               _controller.complete(controller);
               rideMapController = controller;
+
+              setState(() {
+                mapPaddingBottom = Platform.isIOS ? 255 : 260;
+              });
 
               var currentLatLng = LatLng(currentPosition.latitude, currentPosition.longitude);
               var pickupLatLng = widget.tripDetails.pickup;
