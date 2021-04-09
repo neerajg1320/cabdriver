@@ -39,7 +39,7 @@ class PushNotificationService {
       Navigator.pop(context);
 
       if (snapshot.value != null) {
-        final assetsAudioPlayer = assets_audio_player.AssetsAudioPlayer();
+        // final assetsAudioPlayer = assets_audio_player.AssetsAudioPlayer();
         assetsAudioPlayer.open(
           assets_audio_player.Audio('sounds/alert.mp3'),
         );

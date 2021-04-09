@@ -22,7 +22,6 @@ class _HomeTabState extends State<HomeTab> {
   GoogleMapController mapController;
   Completer<GoogleMapController> _controller = Completer();
 
-  Position currentPosition;
   Geolocator geoLocator = Geolocator();
   var locationOptions = LocationOptions(accuracy: LocationAccuracy.bestForNavigation, distanceFilter: 4);
 

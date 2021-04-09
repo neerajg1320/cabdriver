@@ -43,6 +43,7 @@ dependencies:
   flutter_geofire: ^2.0.0
   firebase_messaging: ^9.1.1
   assets_audio_player: ^3.0.3+2
+  toast: ^0.1.5
 
 dev_dependencies:
   flutter_test:
