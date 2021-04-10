@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cabdriver/brand_colors.dart';
+import 'package:cabdriver/datamodels/driver.dart';
 import 'package:cabdriver/globalvarialbes.dart';
 import 'package:cabdriver/helpers/pushnotificationservice.dart';
 import 'package:cabdriver/widgets/AvailabilityButton.dart';
@@ -38,9 +39,19 @@ class _HomeTabState extends State<HomeTab> {
     mapController.animateCamera(CameraUpdate.newLatLng(pos));
   }
 
+  void getCurrentDriverInfo() {
+    DatabaseReference driverRef = FirebaseDatabase.instance.reference().child('drivers/${currentFirebaseUser.uid}');
+    driverRef.once().then((DataSnapshot snapshot) {
+      if (snapshot != null) {
+        currentDriverInfo = Driver.fromSnapshot(snapshot);
+      }
+    });
+  }
+
   void initPushNotification() async {
     PushNotificationService.initialize(context);
     PushNotificationService.getToken();
+    getCurrentDriverInfo();
   }
 
 

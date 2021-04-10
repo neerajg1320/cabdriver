@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cabdriver/datamodels/directiondetails.dart';
 import 'package:cabdriver/helpers/requesthelper.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../globalvarialbes.dart';
@@ -49,4 +50,19 @@ class HelperMethods {
     int radInt = randomGenerator.nextInt(max);
     return radInt.toDouble();
   }
+
+  static void disableHomeTabPositionStream() {
+    if (homeTabPositionStream != null) {
+      homeTabPositionStream.pause();
+    }
+    Geofire.removeLocation(currentFirebaseUser.uid);
+  }
+
+  static void enableHomeTabLocationStream() {
+    if (homeTabPositionStream != null) {
+      homeTabPositionStream.resume();
+    }
+    Geofire.setLocation(currentFirebaseUser.uid, currentPosition.latitude, currentPosition.longitude);
+  }
+
 }
