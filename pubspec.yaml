@@ -44,6 +44,7 @@ dependencies:
   firebase_messaging: ^9.1.1
   assets_audio_player: ^3.0.3+2
   toast: ^0.1.5
+  maps_toolkit: ^1.1.0+2
 
 dev_dependencies:
   flutter_test:
