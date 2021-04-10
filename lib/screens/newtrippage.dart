@@ -6,6 +6,7 @@ import 'package:cabdriver/datamodels/tripdetails.dart';
 import 'package:cabdriver/globalvarialbes.dart';
 import 'package:cabdriver/helpers/helpermethods.dart';
 import 'package:cabdriver/helpers/mapkithelper.dart';
+import 'package:cabdriver/widgets/CollectPaymentDialog.dart';
 import 'package:cabdriver/widgets/ProgressDialog.dart';
 import 'package:cabdriver/widgets/TaxiButton.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -40,6 +41,16 @@ class _NewTripPageState extends State<NewTripPage> {
   var locationOptions = LocationOptions(accuracy: LocationAccuracy.bestForNavigation);
   BitmapDescriptor movingMarkerIcon;
   Position myPosition;
+  String status = 'accepted';
+  String durationStr = '';
+
+  bool isRequestionDirection = false;
+
+  String buttonTitle = 'ARRIVED';
+  Color buttonColor = BrandColors.colorGreen;
+
+  Timer timer;
+  int durationCounter = 0;
 
   void createMarker() {
     if(movingMarkerIcon == null) {
@@ -128,7 +139,7 @@ class _NewTripPageState extends State<NewTripPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '14 mins',
+                      durationStr,
                       style: TextStyle(
                         fontSize: 14,
                         fontFamily: 'Brand-Bold',
@@ -187,9 +198,34 @@ class _NewTripPageState extends State<NewTripPage> {
                     ),
                     SizedBox(height: 25,),
                     TaxiButton(
-                      title: 'ARRIVED',
-                      color: BrandColors.colorGreen,
-                      onPressed: () {
+                      title: buttonTitle,
+                      color: buttonColor,
+                      onPressed: () async {
+                        if (status == 'accepted') {
+                          status = 'arrived';
+                          rideRef.child('status').set('arrived');
+
+                          setState(() {
+                            buttonTitle = 'START TRIP';
+                            buttonColor = BrandColors.colorAccentPurple;
+                          });
+
+                          HelperMethods.showProgressDialog(context);
+                          await getDirection(widget.tripDetails.pickup, widget.tripDetails.destination);
+                          Navigator.pop(context);
+                        } else if (status == 'arrived') {
+                          status = 'ontrip';
+                          rideRef.child('status').set('ontrip');
+
+                          setState(() {
+                            buttonTitle = 'END TRIP';
+                            buttonColor = Colors.red[900];
+                          });
+
+                          startTimer();
+                        } else if (status == 'ontrip') {
+                          endTrip();
+                        }
 
                       },
                     )
@@ -251,7 +287,44 @@ class _NewTripPageState extends State<NewTripPage> {
       });
 
       oldPosition = pos;
+      updateTripDetails();
+
+      Map locationMap = {
+        'latitude': myPosition.latitude.toString(),
+        'longitude': myPosition.longitude.toString(),
+      };
+      rideRef.child('driver_location').set(locationMap);
     });
+
+  }
+
+  void updateTripDetails() async {
+    if(!isRequestionDirection) {
+      isRequestionDirection = true;
+
+      if (myPosition == null) {
+        return;
+      }
+
+      var positionLatLng = LatLng(myPosition.latitude, myPosition.longitude);
+      LatLng destinationLatLng;
+
+      if (status == 'accepted') {
+        destinationLatLng = widget.tripDetails.pickup;
+      } else {
+        destinationLatLng = widget.tripDetails.destination;
+      }
+
+      var directionDetails = await HelperMethods.getDirectionDetails(positionLatLng, destinationLatLng);
+      if (directionDetails != null) {
+        setState(() {
+          durationStr = directionDetails.distanceText;
+        });
+        isRequestionDirection = false;
+      }
+    }
+
+
 
   }
 
@@ -356,5 +429,32 @@ class _NewTripPageState extends State<NewTripPage> {
       _circles.add(pickupCirle);
       _circles.add(destinationCirle);
     });
+  }
+
+  void startTimer() {
+    const interval = Duration(seconds: 1);
+    timer = Timer.periodic(interval, (timer) {
+      durationCounter++;
+    });
+  }
+
+  void endTrip() async {
+    timer.cancel();
+
+    HelperMethods.showProgressDialog(context);
+    var currentLatLng = LatLng(myPosition.latitude, myPosition.longitude);
+    var directionDetails = await HelperMethods.getDirectionDetails(widget.tripDetails.pickup, currentLatLng);
+    Navigator.pop(context);
+
+    int fare = HelperMethods.estimateFares(directionDetails, durationCounter);
+    rideRef.child('fares').set(fare.toString());
+    rideRef.child('status').set('ended');
+    ridePositionStream.cancel();
+    
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => CollectPaymentDialog(paymentMethod: 'cash', fare: fare)
+    );
   }
 }

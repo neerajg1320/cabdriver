@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:cabdriver/datamodels/directiondetails.dart';
 import 'package:cabdriver/helpers/requesthelper.dart';
+import 'package:cabdriver/widgets/ProgressDialog.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -32,13 +34,13 @@ class HelperMethods {
     return directionDetails;
   }
 
-  static int estimateFares(DirectionDetails details) {
+  static int estimateFares(DirectionDetails details, int durationValue) {
     double perKm = 0.3;
     double perMin = 0.2;
     double baseFare = 3;
 
-    double distanceFare = (details. distanceValue/1000) * perKm;
-    double timeFare = (details.durationValue/60) * perMin;
+    double distanceFare = (details. distanceValue / 1000) * perKm;
+    double timeFare = (durationValue / 60) * perMin;
 
     double totalFare = baseFare + distanceFare + timeFare;
 
@@ -65,4 +67,11 @@ class HelperMethods {
     Geofire.setLocation(currentFirebaseUser.uid, currentPosition.latitude, currentPosition.longitude);
   }
 
+  static void showProgressDialog(context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => ProgressDialog('Please wait'),
+    );
+  }
 }
