@@ -27,6 +27,7 @@ class CollectPaymentDialog extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(height: 20,),
               Text(paymentMethod),

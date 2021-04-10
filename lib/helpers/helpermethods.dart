@@ -57,7 +57,10 @@ class HelperMethods {
     if (homeTabPositionStream != null) {
       homeTabPositionStream.pause();
     }
-    Geofire.removeLocation(currentFirebaseUser.uid);
+
+    if (currentFirebaseUser != null) {
+      Geofire.removeLocation(currentFirebaseUser.uid);
+    }
   }
 
   static void enableHomeTabLocationStream() {

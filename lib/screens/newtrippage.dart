@@ -447,7 +447,7 @@ class _NewTripPageState extends State<NewTripPage> {
     Navigator.pop(context);
 
     int fare = HelperMethods.estimateFares(directionDetails, durationCounter);
-    rideRef.child('fares').set(fare.toString());
+    rideRef.child('fare').set(fare.toString());
     rideRef.child('status').set('ended');
     ridePositionStream.cancel();
     
@@ -456,5 +456,21 @@ class _NewTripPageState extends State<NewTripPage> {
       context: context,
       builder: (BuildContext context) => CollectPaymentDialog(paymentMethod: 'cash', fare: fare)
     );
+    
+    updateEarnings(fare);
+  }
+
+  void updateEarnings(int fare) {
+    DatabaseReference earningRef = FirebaseDatabase.instance.reference().child('drivers/${currentFirebaseUser.uid}/earnings');
+    earningRef.once().then((DataSnapshot snapshot) {
+      double oldEarnings = 0;
+      if (snapshot != null) {
+        oldEarnings = double.parse(snapshot.value.toString());
+      }
+      
+      double adjustedEarnings = (fare.toDouble() * .85);
+      double newEarnings = adjustedEarnings + oldEarnings;
+      earningRef.set(newEarnings.toStringAsFixed(2));
+    });
   }
 }
